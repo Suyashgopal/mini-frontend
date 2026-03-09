@@ -1,17 +1,19 @@
 /* CSS Variables for Clinical Precision Design */
 :root {
-  --bg-primary: #0a0e1a;
-  --bg-surface: #111827;
-  --bg-elevated: #1c2537;
-  --accent-green: #00e5a0;
-  --accent-green-dim: #00b37e;
-  --accent-amber: #f59e0b;
-  --accent-red: #ef4444;
-  --text-primary: #f0f4ff;
-  --text-secondary: #8892a4;
-  --text-muted: #4b5563;
-  --border: #1f2d3d;
-  --border-focus: #00e5a0;
+  --vl-blue:        #1e3a5f;
+  --vl-blue-mid:    #2563eb;
+  --vl-green:       #00c896;
+  --vl-green-dim:   #00a07a;
+  --vl-gradient:    linear-gradient(135deg, #3b82f6, #00c896);
+  --vl-surface:     #ffffff;
+  --vl-bg:          #f0f4f8;
+  --vl-border:      #e2e8f0;
+  --vl-text:        #1e293b;
+  --vl-muted:       #64748b;
+  --vl-success-bg:  #ecfdf5;
+  --vl-success:     #059669;
+  --vl-danger-bg:   #fef2f2;
+  --vl-danger:      #dc2626;
 }
 
 .light {
@@ -285,4 +287,45 @@ body {
     padding: 10px 20px;
     font-size: 13px;
   }
+}
+
+/* VeriLabel Global Styles */
+.vl-card {
+  background: var(--vl-surface);
+  border: 1px solid var(--vl-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.vl-btn-primary {
+  background: var(--vl-gradient);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.vl-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.vl-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.vl-btn-ghost {
+  background: transparent;
+  color: var(--vl-blue);
+  border: 1.5px solid var(--vl-border);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.vl-btn-ghost:hover {
+  border-color: var(--vl-green);
+  color: var(--vl-green-dim);
 }

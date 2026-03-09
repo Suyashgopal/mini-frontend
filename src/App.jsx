@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { uploadFile, validateText } from './services/api.service';
+import UploadCard from './components/UploadCard';
+import ExtractionPanel from './components/ExtractionPanel';
+import ValidationPanel from './components/ValidationPanel';
+import LoginModal from './components/LoginModal';
 
 /**
  * @typedef {Object} ExtractedData
@@ -32,6 +36,7 @@ function HomePage() {
   const [isApiOnline, setIsApiOnline] = useState(false);
   const [lastExtractionTime, setLastExtractionTime] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   
   const fileInputRef = useRef(null);
   const progressTimerRef = useRef(null);
@@ -224,266 +229,367 @@ function HomePage() {
     }
   };
 
-  // Get risk level badge class
-  const getRiskBadgeClass = (riskLevel) => {
-    switch (riskLevel?.toLowerCase()) {
-      case 'low': return 'badge-success';
-      case 'medium': return 'badge-warning';
-      case 'high': return 'badge-danger';
-      default: return 'badge-warning';
-    }
-  };
-
   return (
-    <div className="min-h-screen relative">
-      {/* Progress Bar */}
-      {progress > 0 && (
-        <div className="progress-bar fixed top-0 left-0 right-0 z-50">
-          <div 
-            className="progress-fill" 
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
+    <>
+      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
 
-      {/* Theme Toggle */}
-      <button
-        onClick={toggleTheme}
-        className="fixed top-4 right-4 z-40 p-2 rounded-lg border border-var(--border) hover:border-var(--accent-green) transition-colors"
-        style={{ backgroundColor: 'var(--bg-surface)' }}
-        aria-label="Toggle theme"
-      >
-        {isDarkMode ? '🌙' : '☀️'}
-      </button>
+      <div style={{ display: 'flex', minHeight: '100vh',
+        background: 'var(--vl-bg)', color: 'var(--vl-text)' }}>
 
-      {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center grid-bg relative">
-        <div className="container text-center">
-          {/* Badge */}
-          <div className="inline-block px-4 py-2 rounded-full mb-8" style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--accent-green)' }}>
-            <span style={{ color: 'var(--accent-green)' }} className="text-sm font-semibold">
-              Pharmaceutical Grade OCR
-            </span>
-          </div>
+        {/* Main content - full width */}
+        <div style={{ flex: 1, display: 'flex',
+          flexDirection: 'column' }}>
 
-          {/* Heading */}
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 font-mono">
-            Label Verification<br/>
-            <span style={{ color: 'var(--accent-green)' }}>·</span> Instant Compliance
-          </h1>
-
-          {/* Subtext */}
-          <p className="text-xl mb-12 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-            Upload a pharmaceutical label image or PDF. Our AI extracts and validates every field 
-            against verified standards in seconds.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex gap-4 justify-center mb-16">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="btn btn-primary"
-            >
-              📷 Upload Image →
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="btn btn-outline"
-            >
-              📄 Upload PDF →
-            </button>
-          </div>
-
-          {/* Hidden file input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileInputChange}
-            accept="image/*,.pdf"
-            className="hidden"
-          />
-
-          {/* Scroll Indicator */}
-          <div className="scroll-indicator" style={{ color: 'var(--text-secondary)' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M7 10l5 5 5-5"/>
-            </svg>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20" style={{ backgroundColor: 'var(--bg-surface)' }}>
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-16">How It Works</h2>
-          <div className="flex gap-8 items-center justify-center flex-col md:flex-row">
-            {/* Step 1 */}
-            <div className="text-center flex-1">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'var(--accent-green)' }}>
-                <span className="text-2xl">📤</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Upload</h3>
-              <p style={{ color: 'var(--text-secondary)' }}>Drag & drop or select your label file</p>
-            </div>
-
-            {/* Connector */}
-            <div className="hidden md:block w-16 border-t-2 border-dashed" style={{ borderColor: 'var(--border)' }}></div>
-
-            {/* Step 2 */}
-            <div className="text-center flex-1">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'var(--accent-green)' }}>
-                <span className="text-2xl">🔍</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Extract</h3>
-              <p style={{ color: 'var(--text-secondary)' }}>AI extracts text with high accuracy</p>
-            </div>
-
-            {/* Connector */}
-            <div className="hidden md:block w-16 border-t-2 border-dashed" style={{ borderColor: 'var(--border)' }}></div>
-
-            {/* Step 3 */}
-            <div className="text-center flex-1">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'var(--accent-green)' }}>
-                <span className="text-2xl">✅</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Validate</h3>
-              <p style={{ color: 'var(--text-secondary)' }}>Compliance check against standards</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Live Upload Panel */}
-      <section className="py-20" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-16">Try It Now</h2>
-          
-          <div className="flex gap-8 flex-col lg:flex-row">
-            {/* Left - Drop Zone */}
-            <div className="flex-1">
-              <div
-                className={`drop-zone ${dragOver ? 'drag-over' : ''}`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
+          {/* Top Header Bar */}
+          <header style={{
+            height: '80px',
+            background: 'var(--vl-surface)',
+            borderBottom: '1px solid var(--vl-border)',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingLeft: '32px',
+            paddingRight: '32px',
+            gap: '12px',
+            position: 'sticky',
+            top: 0,
+            zIndex: 50,
+          }}>
+            {/* Logo on the left */}
+            <img
+              src="/logo.png"
+              alt="VeriLabel"
+              style={{ height: '56px' }}
+            />
+            
+            {/* Buttons on the right */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button className="vl-btn-ghost" style={{ color: 'var(--vl-blue)', borderColor: 'var(--vl-border)' }}>My Records</button>
+              <button
+                className="vl-btn-ghost"
+                onClick={() => setShowLogin(true)}
+                style={{ color: 'var(--vl-blue)', borderColor: 'var(--vl-border)' }}
               >
-                <div className="text-center">
-                  <div className="text-4xl mb-4">📁</div>
-                  <h3 className="text-xl font-semibold mb-2">
-                    {selectedFile ? 'File Selected' : 'Drop your file here'}
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)' }} className="mb-4">
-                    {selectedFile 
-                      ? `${selectedFile.name} (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB)`
-                      : 'PNG, JPG, JPEG, BMP, TIFF, PDF'
-                    }
-                  </p>
-                  <button
-                    onClick={handleExtract}
-                    disabled={!selectedFile || isExtracting}
-                    className="btn btn-primary"
-                  >
-                    {isExtracting ? 'Processing...' : 'Extract Text'}
-                  </button>
+                Login
+              </button>
+            </div>
+          </header>
+
+          {/* Page content */}
+          <main style={{ padding: '32px', flex: 1 }}>
+
+            {/* Mission Statement Box */}
+            <div style={{
+              background: 'var(--vl-gradient)',
+              borderRadius: '16px',
+              padding: '32px',
+              marginBottom: '32px',
+              boxShadow: '0 8px 32px rgba(30,58,95,0.15)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Background pattern */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(135deg, rgba(59,130,246,0.05) 0%, rgba(0,200,150,0.05) 100%)',
+                pointerEvents: 'none'
+              }} />
+              
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h2 style={{
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: '0 0 16px 0',
+                  lineHeight: '1.3',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                  Every year, counterfeit and mislabeled medicines claim over 500,000 lives globally.
+                </h2>
+                
+                <p style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.95)',
+                  margin: '0 0 16px 0',
+                  lineHeight: '1.6'
+                }}>
+                  Despite billions spent on manufacturing compliance, final check rests on a hospital pharmacist managing 200 shipments a week—manually reviewing labels under fluorescent lighting after a 12-hour shift.
+                </p>
+                
+                <p style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.95)',
+                  margin: '0 0 16px 0',
+                  lineHeight: '1.6'
+                }}>
+                  They miss things. People die.
+                </p>
+                
+                <div style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: '0',
+                  lineHeight: '1.4',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                  Our mission is to eliminate human error in the last line of defense, replacing clipboard with intelligent, automated verification.
                 </div>
               </div>
             </div>
 
-            {/* Right - Results Panel */}
-            <div className="flex-1">
-              <div className="card">
-                <h3 className="text-xl font-semibold mb-4">Results</h3>
-                
-                {/* Progress Status */}
-                {progressStatus && (
-                  <div className="mb-4" style={{ color: 'var(--text-secondary)' }}>
-                    {progressStatus}
-                  </div>
-                )}
+            {/* Page title */}
+            <div style={{ marginBottom: '28px' }}>
+              <h1 style={{ fontSize: '26px', fontWeight: 700,
+                color: 'var(--vl-blue)', margin: 0 }}>
+                Label Verification
+              </h1>
+              <p style={{ color: 'var(--vl-muted)', marginTop: '4px',
+                fontSize: '14px' }}>
+                Upload a pharmaceutical label to extract and verify its contents.
+              </p>
+            </div>
 
-                {/* Extracted Text */}
-                {extractedData?.extracted_text ? (
-                  <div className="mb-6">
-                    <h4 className="font-semibold mb-2">Extracted Text</h4>
-                    <div className="p-4 rounded-lg font-mono text-sm max-h-48 overflow-y-auto" style={{ backgroundColor: 'var(--bg-elevated)' }}>
-                      {extractedData.extracted_text}
-                    </div>
-                    <div className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-                      Model: {extractedData.model_name} • Time: {extractedData.processing_time}s
-                      {extractedData.pages_processed && ` • Pages: ${extractedData.pages_processed}`}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-6 text-center py-8" style={{ color: 'var(--text-muted)' }}>
-                    <div className="text-2xl mb-2">📋</div>
-                    <p>Upload a file to see extracted text</p>
-                  </div>
-                )}
+            {/* Upload + Extraction row */}
+            <div style={{ display: 'flex', gap: '24px',
+              alignItems: 'flex-start', marginBottom: '24px' }}>
 
-                {/* Validation Result */}
-                {validationResult ? (
-                  <div>
-                    <h4 className="font-semibold mb-2">Validation Result</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Risk Level:</span>
-                        <span className={`badge ${getRiskBadgeClass(validationResult.risk_level)}`}>
-                          {validationResult.risk_level}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Confidence:</span>
-                        <span>{validationResult.confidence_score}%</span>
-                      </div>
-                      {validationResult.drug_name && (
-                        <div className="flex justify-between">
-                          <span>Drug Name:</span>
-                          <span>{validationResult.drug_name}</span>
-                        </div>
-                      )}
-                      {validationResult.strength && (
-                        <div className="flex justify-between">
-                          <span>Strength:</span>
-                          <span>{validationResult.strength}</span>
-                        </div>
-                      )}
-                      {validationResult.missing_fields?.length > 0 && (
-                        <div>
-                          <span className="font-semibold">Missing Fields:</span>
-                          <div className="mt-1">
-                            {validationResult.missing_fields.map((field, index) => (
-                              <span key={index} className="badge badge-warning mr-2">
-                                {field}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : extractedData && (
-                  <div className="text-center py-4" style={{ color: 'var(--text-muted)' }}>
-                    <p>Validation in progress...</p>
-                  </div>
-                )}
+              <div style={{ flex: '0 0 55%' }}>
+                <UploadCard
+                  selectedFile={selectedFile}
+                  dragOver={dragOver}
+                  isExtracting={isExtracting}
+                  fileInputRef={fileInputRef}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onFileInputChange={handleFileInputChange}
+                  onExtract={handleExtract}
+                />
+              </div>
+
+              <div style={{ flex: '0 0 calc(45% - 24px)' }}>
+                <ExtractionPanel
+                  extractedData={extractedData}
+                  isExtracting={isExtracting}
+                  progress={progress}
+                  progressStatus={progressStatus}
+                />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Status Bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-10 flex items-center justify-between px-4 text-sm" style={{ backgroundColor: 'var(--bg-surface)', borderTop: '1px solid var(--border)' }}>
-        <div className="flex items-center">
-          <span className={`health-dot ${isApiOnline ? 'health-online' : 'health-offline'}`}></span>
-          <span style={{ color: 'var(--text-secondary)' }}>API</span>
-        </div>
-        <div style={{ color: 'var(--text-secondary)' }}>
-          {lastExtractionTime ? `Last: ${lastExtractionTime}` : 'No extractions yet'}
+            {/* Validation Panel — full width, only when data exists */}
+            {extractedData && (
+              <ValidationPanel
+                validationResult={validationResult}
+                extractedData={extractedData}
+              />
+            )}
+
+            {/* Why Trust Us Section */}
+            <div style={{
+              background: 'var(--vl-gradient)',
+              borderRadius: '16px',
+              padding: '32px',
+              marginTop: '32px',
+              boxShadow: '0 8px 32px rgba(30,58,95,0.15)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Background pattern */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(135deg, rgba(59,130,246,0.05) 0%, rgba(0,200,150,0.05) 100%)',
+                pointerEvents: 'none'
+              }} />
+              
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h2 style={{
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  color: 'white',
+                  margin: '0 0 16px 0',
+                  lineHeight: '1.3',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                  Why Trust Us?
+                </h2>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                  gap: '24px',
+                  margin: '24px 0'
+                }}>
+                  <div>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: 'white',
+                      margin: '0 0 12px 0',
+                      lineHeight: '1.4',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
+                      Tamper-Proof Security
+                    </h3>
+                    <p style={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: 'rgba(255,255,255,0.9)',
+                      margin: 0,
+                      lineHeight: '1.6'
+                    }}>
+                      If a single character is edited, our cryptographic seal breaks instantly. Every verification is permanently recorded and unchangeable.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: 'white',
+                      margin: '0 0 12px 0',
+                      lineHeight: '1.4',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
+                      Bank-Grade Encryption
+                    </h3>
+                    <p style={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: 'rgba(255,255,255,0.9)',
+                      margin: 0,
+                      lineHeight: '1.6'
+                    }}>
+                      SHA-256 encrypted seals—the same standard trusted by banks and governments worldwide for securing critical data.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: 'white',
+                      margin: '0 0 12px 0',
+                      lineHeight: '1.4',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
+                      Full Audit Trail
+                    </h3>
+                    <p style={{
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: 'rgba(255,255,255,0.9)',
+                      margin: 0,
+                      lineHeight: '1.6'
+                    }}>
+                      Every check creates legally defensible evidence. Data remains identical in regulatory audits or court proceedings even months later.
+                    </p>
+                  </div>
+                </div>
+                
+                <div style={{
+                  marginTop: '24px',
+                  padding: '20px',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.2)'
+                }}>
+                  <div style={{
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: 'white',
+                    margin: '0 0 12px 0',
+                    textAlign: 'center',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}>
+                    Most systems allow results to be altered quietly, turning a failed check into a pass without a trace.
+                  </div>
+                  <div style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: '#00c896',
+                    margin: '0',
+                    textAlign: 'center',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}>
+                    VeriLabel is different.
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '16px',
+                  marginTop: '24px',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    background: 'rgba(255,255,255,0.15)',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'white'
+                  }}>
+                    🔒 SHA-256 Encrypted
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    background: 'rgba(255,255,255,0.15)',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'white'
+                  }}>
+                    🛡️ Tamper-Evident Records
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    background: 'rgba(255,255,255,0.15)',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'white'
+                  }}>
+                    📋 Full Audit Trail
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
-    </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileInputChange}
+        accept="image/*,.pdf"
+        style={{ display: 'none' }}
+      />
+    </>
   );
 }
 
